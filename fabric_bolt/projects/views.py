@@ -396,17 +396,19 @@ class DeploymentCreate(MultipleGroupRequiredMixin, CreateView):
 
         self.object.user = self.request.user
 
-        configuration_values = {
-            'fabric_bolt_deploy_id': self.object.id
-        }
+        configuration_values = {}
 
         for key, value in form.cleaned_data.iteritems():
             if key.startswith('configuration_value_for_'):
                 configuration_values[key.replace('configuration_value_for_', '')] = value
+        self.object.save()
 
+        # Save the id afterwards
+        configuration_values['fabric_bolt_deploy_id'] = self.object.id
         self.object.configuration = json.dumps({"configuration_values":configuration_values})
         self.object.save()
 
+        # Launch deploy!
         deploy.spool(deployment_id=str(self.object.id))
         return super(DeploymentCreate, self).form_valid(form)
 
