@@ -230,6 +230,7 @@ def build_command(deployment, session, abort_on_prompts=True):
                 value = unicode(configs[key].get_value())
             elif key in arg_values:
                 value = unicode(arg_values[key])
+                del arg_values[key]
             else:
                 continue
 
@@ -242,8 +243,13 @@ def build_command(deployment, session, abort_on_prompts=True):
             command += ','.join(key_value_strings)
 
     if normal_task_configs:
+        confs = [get_key_value_string(key, configs[key]) for key in normal_task_configs]
+        # Set remaning args as a normal task configs
+        if arg_values:
+            confs += ["{0}={1}".format(k, v) for k, v in arg_values.items()]
+
         command += ' --set '
-        command += '"' + ','.join(get_key_value_string(key, configs[key]) for key in normal_task_configs) + '"'
+        command += '"' + ','.join(confs) + '"'
 
     if special_task_configs:
         for key in special_task_configs:
