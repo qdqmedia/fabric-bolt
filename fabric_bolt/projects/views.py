@@ -396,7 +396,10 @@ class DeploymentCreate(MultipleGroupRequiredMixin, CreateView):
 
         self.object.user = self.request.user
 
-        configuration_values = {}
+        # Set basic data
+        configuration_values = {
+            'deployer_email': self.request.user.email
+        }
 
         for key, value in form.cleaned_data.iteritems():
             if key.startswith('configuration_value_for_'):
